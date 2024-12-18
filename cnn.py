@@ -81,49 +81,6 @@ class CNN_model(nn.Module):
         x = self.fc2(x)
         return x
 
-class Autoencoder(nn.Module):
-    def __init__(self):
-        super(Autoencoder, self).__init__()
-        self.encoder = nn.Sequential(
-            nn.Conv2d(1, 16, kernel_size=3, stride=2, padding=1),
-            nn.ReLU(),
-            nn.Conv2d(16, 8, kernel_size=3, stride=2, padding=1),
-            nn.ReLU()
-            )
-        self.decoder = nn.Sequential(
-            nn.ConvTranspose2d(8, 16, kernel_size=3, stride=2, padding=1, output_padding=1),
-            nn.ReLU(),
-            nn.ConvTranspose2d(16, 1, kernel_size=3, stride=2, padding=1, output_padding=1),
-            nn.Sigmoid()
-            )
-        
-    def forward(self, x):
-        x = self.encoder(x)
-        x = self.decoder(x)
-        return x
-
-class CNN_with_Autoencoder(nn.Module):
-    def __init__(self, autoencoder):
-        super(CNN_with_Autoencoder, self).__init__()
-        self.conv1 = nn.Conv2d(8, 32, kernel_size=3, padding=1)
-        self.pool = nn.MaxPool2d(3)
-        self.fc1 = nn.Linear(32*18*18,128)
-        self.fc2 = nn.Linear(128,2)
-        self.relu = nn.ReLU()
-        self.flatten = nn.Flatten()
-        self.autoencoder = autoencoder
-    
-    def forward(self, x):
-        x = self.autoencoder.encoder(x)
-        x = self.conv1(x)
-        x = self.relu(x)
-        x = self.pool(x)
-        x = self.flatten(x)
-        x = self.fc1(x)
-        x = self.relu(x)
-        x = self.fc2(x)
-        return x
-    
 model = CNN_model()
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr = 0.00075)
@@ -142,38 +99,6 @@ for epoch in range(num_epochs):
     train_loss.append(loss.item())
     print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}')
 
-# autoencoder = Autoencoder()
-# criterion_autoencoder = nn.MSELoss()
-# optimizer_autoencoder = optim.Adam(autoencoder.parameters(), lr = 0.0001)
-# num_epochs = 20
-
-# for epoch in range(num_epochs):
-#     for batch in train_dataloader:
-#         inputs, _ = batch
-#         optimizer_autoencoder.zero_grad()
-#         outputs = autoencoder(inputs)
-#         loss_autoencoder = criterion_autoencoder(outputs, inputs)
-#         loss_autoencoder.backward()
-#         optimizer_autoencoder.step()
-#     print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss_autoencoder.item():.4f}')
-
-# cnn_autoencoder = CNN_with_Autoencoder(autoencoder)
-# criterion_cnn = nn.CrossEntropyLoss()
-# optimizer_cnn = optim.Adam(cnn_autoencoder.parameters(), lr = 0.0005)
-
-# num_epochs = 25
-# train_loss = []
-
-# for epoch in range(num_epochs):
-#     for batch in train_dataloader:
-#         inputs, labels = batch
-#         optimizer_cnn.zero_grad()
-#         outputs = cnn_autoencoder(inputs)
-#         loss_cnn = criterion_cnn(outputs, labels)
-#         loss_cnn.backward()
-#         optimizer_cnn.step()
-#     train_loss.append(loss_cnn.item())
-#     print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss_cnn.item():.4f}')
     
 with torch.no_grad():
     correct = 0
