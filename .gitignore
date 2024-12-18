@@ -1,1 +1,6 @@
 cnn/
+*.dylib
+*.so
+*.pyc
+--pycache__/
+*.log
